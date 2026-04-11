@@ -1,0 +1,9 @@
+# 167Call - Vercel Deployment Config
+
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nuxt",
+  "outputDirectory": ".output/public",
+  "install": true
+}

@@ -1,0 +1,29 @@
+{
+  "name": "167call",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxtjs/supabase": "^1.4.6",
+    "@vueuse/core": "^10.11.0",
+    "httpsms": "^0.0.4",
+    "libphonenumber-js": "^1.11.3",
+    "lucide-vue-next": "^0.378.0",
+    "nuxt": "^3.12.2",
+    "vue": "^3.4.29",
+    "vue-router": "^4.3.3"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "^1.3.3",
+    "@nuxtjs/tailwindcss": "^6.12.1",
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5"
+  }
+}

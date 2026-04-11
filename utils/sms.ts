@@ -1,4 +1,4 @@
-// SMS Gateway - Proven from 121Call
+// SMS Gateway - Proven from 167Call
 import type { Contact, SmsPreview, SmsDispatchResult } from './types'
 
 type SmsPreviewOptions = {

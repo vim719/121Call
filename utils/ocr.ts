@@ -1,17 +1,6 @@
-// OCR Phone Extraction - Proven from 121Call
+// OCR Phone Extraction - Proven from 167Call
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
-
-export interface OcrCandidate {
-  id: string
-  raw: string
-  normalized: string
-  context: string
-  score: number
-  confidence: 'high' | 'medium' | 'low'
-  inferredName?: string
-  suspicion?: string
-  selected: boolean
-}
+import type { OcrCandidate } from './types'
 
 const PHONE_PATTERNS = [
   { pattern: /\+?1?[-.\s]*(?:\(\d{3}\)|\d{3})[-.\s]*\d{3}[-.\s]*\d{4}/g, kind: 'full' as const },

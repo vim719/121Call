@@ -6,7 +6,7 @@
         <div class="logo-icon">
           <Zap :size="28" />
         </div>
-        <h1 class="text-2xl font-semibold mt-4 text-slate-900">Welcome to 121Call</h1>
+        <h1 class="text-2xl font-semibold mt-4 text-slate-900">Welcome to 167Call</h1>
         <p class="text-sm text-slate-500 mt-1">Your smart sales assistant</p>
       </div>
 

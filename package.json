@@ -12,9 +12,10 @@
   },
   "dependencies": {
     "@nuxtjs/supabase": "^1.4.6",
-    "@supabase/supabase-js": "^2.103.0",
+    "@supabase/supabase-js": "^2.48.1",
     "@vueuse/core": "^10.11.0",
-    "dotenv": "^17.4.1",
+    "dotenv": "^16.4.7",
+    "html5-qrcode": "^2.3.8",
     "httpsms": "^0.0.4",
     "libphonenumber-js": "^1.11.3",
     "lucide-vue-next": "^0.378.0",

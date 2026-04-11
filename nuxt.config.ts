@@ -29,7 +29,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: '167Call - Smart Sales Assistant',
+      title: '121Call - Smart Sales Assistant',
       meta: [
         { name: 'description', content: 'Your AI-powered retail sales assistant for personalized SMS campaigns' },
         { name: 'theme-color', content: '#007AFF' },

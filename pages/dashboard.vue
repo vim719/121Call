@@ -8,7 +8,7 @@
             <Zap :size="20" />
           </div>
           <div>
-            <h1 class="text-lg font-semibold text-slate-900">167Call</h1>
+            <h1 class="text-lg font-semibold text-slate-900">121Call</h1>
             <p class="text-xs text-slate-500">Smart Sales</p>
           </div>
         </div>

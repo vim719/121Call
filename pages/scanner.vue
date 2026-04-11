@@ -1,130 +1,154 @@
 <template>
-  <div class="page-container">
-    <div class="scanner-card">
-      <div class="scanner-header">
-        <div class="header-content">
-          <div class="icon-wrapper">
-            <ScanLine :size="24" />
-          </div>
-          <div>
-            <h1 class="title">Smart Scanner</h1>
-            <p class="subtitle">Capture contacts from any paper</p>
-          </div>
+  <div class="min-h-screen bg-slate-50 pb-20">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200">
+      <div class="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <NuxtLink to="/dashboard" class="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+            <ArrowLeft :size="20" class="text-slate-600" />
+          </NuxtLink>
+          <h1 class="text-lg font-bold text-slate-900">Smart Scanner</h1>
         </div>
-      </div>
-
-      <div class="camera-frame" :class="{ 'is-processing': isProcessing }">
-        <video 
-          v-if="cameraActive && !isProcessing" 
-          ref="videoRef" 
-          class="camera-feed"
-          autoplay 
-          playsinline
-          muted
-        />
-        
-        <div v-else-if="!cameraActive && !capturedImage" class="camera-placeholder">
-          <Camera :size="48" />
-          <p>Tap to activate camera</p>
-        </div>
-
-        <img 
-          v-if="capturedImage" 
-          :src="capturedImage" 
-          class="captured-image"
-          alt="Captured"
-        />
-
-        <div v-if="isProcessing" class="processing-overlay">
-          <div class="processing-content">
-            <Loader2 :size="32" class="animate-spin" />
-            <span>Extracting contacts...</span>
-          </div>
-        </div>
-
-        <div class="scan-overlay">
-          <div class="corner top-left"></div>
-          <div class="corner top-right"></div>
-          <div class="corner bottom-left"></div>
-          <div class="corner bottom-right"></div>
-        </div>
-
-        <button 
-          v-if="cameraActive && !isProcessing && !capturedImage"
-          @click="capture" 
-          class="capture-button"
-          :disabled="isCapturing"
-        >
-          <div class="capture-ring">
-            <div class="capture-inner"></div>
-          </div>
+        <button v-if="contacts.length > 0" @click="resetScanner" class="text-sm font-medium text-brand-600">
+          Reset
         </button>
       </div>
+    </header>
 
-      <div class="results-section" v-if="contacts.length > 0">
-        <div class="results-header">
-          <CheckCircle2 :size="20" class="text-emerald-500" />
-          <span>{{ contacts.length }} contacts found</span>
-        </div>
-        
-        <div class="contacts-list">
-          <div 
-            v-for="contact in contacts" 
-            :key="contact.id"
-            class="contact-item"
-            :class="{ 'low-confidence': contact.confidence === 'low' }"
-          >
-            <div class="contact-info">
-              <span class="contact-name">{{ contact.name || 'Unknown' }}</span>
-              <span class="contact-phone">{{ contact.formatted }}</span>
+    <main class="max-w-lg mx-auto px-4 py-6">
+      <!-- Camera/Upload View -->
+      <div v-if="!capturedImage && !isProcessing" class="space-y-6">
+        <div class="relative aspect-[3/4] bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl">
+          <video
+            v-if="cameraActive"
+            ref="videoRef"
+            class="w-full h-full object-cover"
+            autoplay
+            playsinline
+            muted
+          />
+
+          <div v-else class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-4">
+            <div class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center">
+              <Camera :size="32" />
             </div>
-            <div class="confidence-badge" :class="contact.confidence">
-              {{ contact.confidence }}
-            </div>
+            <p class="font-medium">Camera is inactive</p>
+          </div>
+
+          <!-- Scanner Overlay -->
+          <div class="absolute inset-8 pointer-events-none">
+            <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-brand-500 rounded-tl-xl"></div>
+            <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-brand-500 rounded-tr-xl"></div>
+            <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-brand-500 rounded-bl-xl"></div>
+            <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-brand-500 rounded-br-xl"></div>
+          </div>
+
+          <!-- Capture Button -->
+          <div v-if="cameraActive" class="absolute bottom-8 left-0 right-0 flex justify-center">
+            <button @click="capture" class="group relative w-20 h-20 flex items-center justify-center">
+              <div class="absolute inset-0 bg-white/20 rounded-full scale-110 blur-sm group-active:scale-95 transition-transform"></div>
+              <div class="w-16 h-16 bg-white rounded-full border-4 border-slate-900 group-active:scale-90 transition-transform shadow-xl"></div>
+            </button>
           </div>
         </div>
 
-        <div class="action-buttons">
-          <button @click="resetScanner" class="btn-secondary">
-            Scan Again
+        <div class="flex flex-col gap-3">
+          <button v-if="!cameraActive" @click="startCamera" class="w-full py-4 bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-600/20 flex items-center justify-center gap-2">
+            <Camera :size="20" />
+            Open Camera
           </button>
-          <button @click="importContacts" class="btn-primary">
-            Add to Contacts
-          </button>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button 
-          v-if="!cameraActive && !capturedImage"
-          @click="startCamera" 
-          class="btn-primary full-width"
-        >
-          <Camera :size="20" />
-          Start Scanning
-        </button>
-
-        <div v-if="cameraActive && !capturedImage" class="upload-option">
-          <span class="-divider">or</span>
-          <label class="upload-button">
-            <Upload :size="18" />
-            Upload Image
-            <input 
-              type="file" 
-              accept="image/*" 
-              @change="handleFileUpload" 
-              hidden
-            />
+          <label class="w-full py-4 bg-white text-slate-900 font-bold rounded-2xl border border-slate-200 shadow-sm flex items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-colors">
+            <Upload :size="20" />
+            Upload from Gallery
+            <input type="file" accept="image/*" @change="handleFileUpload" hidden />
           </label>
         </div>
       </div>
-    </div>
+
+      <!-- Processing State -->
+      <div v-if="isProcessing" class="flex flex-col items-center justify-center py-20 gap-6">
+        <div class="relative w-24 h-24">
+          <div class="absolute inset-0 border-4 border-brand-100 rounded-full"></div>
+          <div class="absolute inset-0 border-4 border-brand-600 rounded-full border-t-transparent animate-spin"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <Zap :size="32" class="text-brand-600 fill-brand-600/10" />
+          </div>
+        </div>
+        <div class="text-center">
+          <h2 class="text-xl font-bold text-slate-900 mb-1">AI Extracting...</h2>
+          <p class="text-slate-500">Detecting phone numbers and names</p>
+        </div>
+      </div>
+
+      <!-- Results View -->
+      <div v-if="capturedImage && !isProcessing" class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-600 text-xs font-bold uppercase tracking-wider">
+            <Sparkles :size="14" />
+            {{ contacts.length }} Contacts Found
+          </div>
+          <p class="text-xs text-slate-400 font-medium">Verify before importing</p>
+        </div>
+
+        <div class="space-y-3">
+          <div v-for="(contact, index) in contacts" :key="contact.id"
+            class="group p-4 bg-white rounded-2xl border border-slate-200 shadow-sm transition-all"
+            :class="{ 'opacity-50 ring-1 ring-slate-100 grayscale-[0.5]': !contact.selected }"
+          >
+            <div class="flex items-center gap-4">
+              <button @click="contact.selected = !contact.selected"
+                class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all"
+                :class="contact.selected ? 'bg-brand-600 border-brand-600 text-white' : 'border-slate-300'"
+              >
+                <Check :size="14" stroke-width="3" v-if="contact.selected" />
+              </button>
+
+              <div class="flex-1 space-y-2">
+                <div class="flex gap-2">
+                  <input
+                    v-model="contact.name"
+                    placeholder="Add name..."
+                    class="flex-1 text-sm font-bold text-slate-900 bg-transparent border-none p-0 focus:ring-0 placeholder:text-slate-300"
+                  />
+                  <div class="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
+                    {{ contact.confidence }}
+                  </div>
+                </div>
+                <input
+                  v-model="contact.formatted"
+                  class="w-full text-xs text-slate-500 bg-transparent border-none p-0 focus:ring-0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fixed bottom-6 left-4 right-4 max-w-lg mx-auto">
+          <button
+            @click="importContacts"
+            :disabled="selectedCount === 0"
+            class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl shadow-xl shadow-slate-900/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+          >
+            Add {{ selectedCount }} Contacts
+            <ArrowRight :size="20" />
+          </button>
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ScanLine, Camera, Upload, Loader2, CheckCircle2 } from 'lucide-vue-next'
-import { extractPhoneCandidates, formatPhoneLabel } from '~/utils/ocr'
+import {
+  ArrowLeft,
+  Camera,
+  Upload,
+  Zap,
+  Sparkles,
+  Check,
+  ArrowRight,
+  CheckCircle2
+} from 'lucide-vue-next'
 
 interface Contact {
   id: string
@@ -132,102 +156,24 @@ interface Contact {
   formatted: string
   name?: string
   confidence: 'high' | 'medium' | 'low'
+  selected: boolean
 }
 
 const videoRef = ref<HTMLVideoElement | null>(null)
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-
 const cameraActive = ref(false)
 const isProcessing = ref(false)
-const isCapturing = ref(false)
 const capturedImage = ref('')
 const contacts = ref<Contact[]>([])
-let mediaStream: MediaStream | null = null
+const stream = ref<MediaStream | null>(null)
 
-const { start: startCameraStream, stop: stopCameraStream, stream } = useMediaDevices({ 
-  constraints: { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }
-})
-
-const US_PHONE_PATTERNS = [
-  /\b(\+?1[-.\s]?)?(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})\b/g,
-  /\b\d{10}\b/g,
-]
-
-function calculateConfidence(raw: string, context: string): 'high' | 'medium' | 'low' {
-  let score = 0
-  
-  if (raw.match(/^\+?1?\d{10}$/)) score += 30
-  if (context.match(/(?:ph|cell|mobile|call)[:\s]/i)) score += 20
-  if (raw.match(/^\d{3}[-.\s]\d{4}$/)) score += 25
-  if (raw.match(/^(?:800|888|877|866|855)\d{7}$/)) score -= 20
-  if (raw.match(/^1{10}$/) || raw.match(/^(?:123|999)\d{7}$/)) score -= 40
-  
-  if (score >= 30) return 'high'
-  if (score >= 0) return 'medium'
-  return 'low'
-}
-
-async function extractPhonesFromCanvas(canvas: HTMLCanvasElement): Promise<Contact[]> {
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return []
-
-  const imageData = canvas.toDataURL('image/jpeg', 0.8)
-  
-  try {
-    const { data } = await useFetch('/api/ocr/extract', {
-      method: 'POST',
-      body: { image: imageData },
-      headers: { 'Content-Type': 'application/json' }
-    }) as any
-
-    if (data.value?.success) {
-      return data.value.contacts.map((c: any) => ({
-        id: crypto.randomUUID(),
-        phone: c.normalized,
-        formatted: c.formatted,
-        name: c.inferredName,
-        confidence: c.confidence as 'high' | 'medium' | 'low'
-      }))
-    }
-  } catch (e) {
-    console.error('OCR API failed, falling back to regex', e)
-  }
-
-  return []
-}
-
-async function capture() {
-  if (!videoRef.value || isCapturing.value) return
-  
-  isCapturing.value = true
-  
-  const video = videoRef.value
-  const canvas = document.createElement('canvas')
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
-  
-  const ctx = canvas.getContext('2d')
-  ctx?.drawImage(video, 0, 0)
-  
-  capturedImage.value = canvas.toDataURL('image/jpeg', 0.8)
-  isProcessing.value = true
-  
-  const foundContacts = await extractPhonesFromCanvas(canvas)
-  contacts.value = foundContacts
-  
-  isProcessing.value = false
-  isCapturing.value = false
-  
-  stopCameraStream()
-  cameraActive.value = false
-}
+const selectedCount = computed(() => contacts.value.filter(c => c.selected).length)
 
 async function startCamera() {
   try {
     stream.value = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
     })
-    
+
     if (videoRef.value) {
       videoRef.value.srcObject = stream.value
       await videoRef.value.play()
@@ -241,8 +187,50 @@ async function startCamera() {
 function stopCamera() {
   if (stream.value) {
     stream.value.getTracks().forEach(track => track.stop())
+    stream.value = null
   }
   cameraActive.value = false
+}
+
+async function extractPhonesFromCanvas(canvas: HTMLCanvasElement): Promise<Contact[]> {
+  const imageData = canvas.toDataURL('image/jpeg', 0.8)
+  
+  try {
+    const data = await $fetch('/api/ocr/extract', {
+      method: 'POST',
+      body: { image: imageData }
+    }) as any
+
+    if (data?.success) {
+      return data.contacts.map((c: any) => ({
+        ...c,
+        selected: c.confidence !== 'low'
+      }))
+    }
+  } catch (e) {
+    console.error('OCR API failed', e)
+  }
+  return []
+}
+
+async function capture() {
+  if (!videoRef.value) return
+  
+  const video = videoRef.value
+  const canvas = document.createElement('canvas')
+  canvas.width = video.videoWidth
+  canvas.height = video.videoHeight
+  
+  const ctx = canvas.getContext('2d')
+  ctx?.drawImage(video, 0, 0)
+  
+  capturedImage.value = canvas.toDataURL('image/jpeg', 0.8)
+  isProcessing.value = true
+  
+  stopCamera()
+  
+  contacts.value = await extractPhonesFromCanvas(canvas)
+  isProcessing.value = false
 }
 
 async function handleFileUpload(event: Event) {
@@ -263,8 +251,7 @@ async function handleFileUpload(event: Event) {
       const ctx = canvas.getContext('2d')
       ctx?.drawImage(img, 0, 0)
       
-      const foundContacts = await extractPhonesFromCanvas(canvas)
-      contacts.value = foundContacts
+      contacts.value = await extractPhonesFromCanvas(canvas)
       isProcessing.value = false
     }
     img.src = reader.result as string
@@ -275,382 +262,38 @@ async function handleFileUpload(event: Event) {
 function resetScanner() {
   capturedImage.value = ''
   contacts.value = []
+  isProcessing.value = false
+  stopCamera()
 }
 
 async function importContacts() {
-  const { data: { user } } = useSupabaseUser()
+  const user = useSupabaseUser()
   if (!user.value) {
     navigateTo('/login')
     return
   }
 
   const { $supabase } = useNuxtApp()
+  const selectedContacts = contacts.value.filter(c => c.selected)
   
-  for (const contact of contacts.value) {
-    const { error } = await $supabase
-      .from('contacts')
-      .insert({
-        user_id: user.value.id,
-        phone: contact.phone,
-        name: contact.name || null,
-        source: 'ocr',
-        confidence: contact.confidence
-      })
-    
-    if (error) {
-      console.error('Failed to import contact:', error)
-    }
+  for (const contact of selectedContacts) {
+    await $supabase.from('contacts').insert({
+      user_id: user.value.id,
+      phone: contact.phone,
+      name: contact.name || null,
+      source: 'ocr',
+      confidence: contact.confidence
+    })
   }
 
   navigateTo('/contacts')
 }
 
-onUnmounted(() => {
-  stopCamera()
-})
+onUnmounted(() => stopCamera())
 </script>
 
 <style scoped>
-.page-container {
-  min-height: 100vh;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.scanner-card {
-  width: 100%;
-  max-width: 400px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  border-radius: 2rem;
-  padding: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
-}
-
-.scanner-header {
-  margin-bottom: 1.5rem;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.icon-wrapper {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-  border-radius: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.subtitle {
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-.camera-frame {
-  position: relative;
-  aspect-ratio: 3/4;
-  background: #0f172a;
-  border-radius: 1.5rem;
-  overflow: hidden;
-}
-
-.camera-feed {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.camera-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  color: #475569;
-}
-
-.captured-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.processing-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.processing-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.scan-overlay {
-  position: absolute;
-  inset: 1rem;
-  pointer-events: none;
-}
-
-.corner {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-color: #007AFF;
-}
-
-.corner.top-left {
-  top: 0;
-  left: 0;
-  border-top: 3px solid;
-  border-left: 3px solid;
-}
-
-.corner.top-right {
-  top: 0;
-  right: 0;
-  border-top: 3px solid;
-  border-right: 3px solid;
-}
-
-.corner.bottom-left {
-  bottom: 0;
-  left: 0;
-  border-bottom: 3px solid;
-  border-left: 3px solid;
-}
-
-.corner.bottom-right {
-  bottom: 0;
-  right: 0;
-  border-bottom: 3px solid;
-  border-right: 3px solid;
-}
-
-.capture-button {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.capture-ring {
-  width: 64px;
-  height: 64px;
-  border: 3px solid white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.capture-inner {
-  width: 48px;
-  height: 48px;
-  background: white;
-  border-radius: 50%;
-}
-
-.capture-button:active .capture-inner {
-  transform: scale(0.9);
-}
-
-.results-section {
-  margin-top: 1.5rem;
-  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.results-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  color: #059669;
-  margin-bottom: 1rem;
-}
-
-.contacts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.875rem 1rem;
-  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-  border-radius: 1rem;
-  border: 1px solid #E2E8F0;
-}
-
-.contact-item.low-confidence {
-  opacity: 0.6;
-  background: #FEF3C7;
-  border-color: #FCD34D;
-}
-
-.contact-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.contact-name {
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.contact-phone {
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-.confidence-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  text-transform: capitalize;
-}
-
-.confidence-badge.high {
-  background: #D1FAE5;
-  color: #059669;
-}
-
-.confidence-badge.medium {
-  background: #FEF3C7;
-  color: #D97706;
-}
-
-.confidence-badge.low {
-  background: #FEE2E2;
-  color: #DC2626;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-}
-
-.btn-primary {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #007AFF 0%, #0051E6 100%);
-  color: white;
-  font-weight: 600;
-  border: none;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
-}
-
-.btn-secondary {
-  flex: 1;
-  padding: 0.875rem 1.5rem;
-  background: #F1F5F9;
-  color: #475569;
-  font-weight: 600;
-  border: 1px solid #E2E8F0;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: #E2E8F0;
-}
-
-.controls {
-  margin-top: 1.5rem;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.upload-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.divider {
-  color: #94A3B8;
-  font-size: 0.875rem;
-}
-
-.upload-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #F1F5F9;
-  color: #475569;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.upload-button:hover {
-  background: #E2E8F0;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+input::placeholder {
+  color: #CBD5E1;
 }
 </style>

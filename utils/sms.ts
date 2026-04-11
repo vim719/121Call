@@ -1,4 +1,4 @@
-// SMS Gateway - Proven from RetailConnect
+// SMS Gateway - Proven from 121Call
 import type { Contact, SmsPreview, SmsDispatchResult } from './types'
 
 type SmsPreviewOptions = {

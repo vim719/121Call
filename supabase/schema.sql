@@ -1,4 +1,4 @@
--- 167Call Database Schema
+-- 121Call Database Schema
 -- Run this in Supabase SQL Editor
 
 -- Enable extensions

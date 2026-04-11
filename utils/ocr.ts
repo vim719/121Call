@@ -1,4 +1,4 @@
-// OCR Phone Extraction - Proven from RetailConnect
+// OCR Phone Extraction - Proven from 121Call
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
 
 export interface OcrCandidate {

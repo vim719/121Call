@@ -3,6 +3,8 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@nuxtjs/supabase'],
   
   supabase: {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_ANON_KEY,
     redirect: false,
     redirectOptions: {
       login: '/login',
@@ -11,19 +13,13 @@ export default defineNuxtConfig({
     }
   },
 
-  supabase: {
-    url: 'https://ikeggsjzytrrdgnqebkb.supabase.co',
-    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZWdnc2p6eXRycmRnbnFlYmtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NzQzNTAsImV4cCI6MjA5MTQ1MDM1MH0.H4BPwZ6naBpF9ZHeqhfdLzzcQmA9UOn4nYWmjlGUNHE',
-    redirect: false
-  },
-
   runtimeConfig: {
-    httpsmsApiKey: process.env.HTTPSMS_API_KEY || '',
-    googleVisionApiKey: process.env.GOOGLE_VISION_API_KEY || '',
-    supabaseServiceKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZWdnc2p6eXRycmRnbnFlYmtiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTg3NDM1MCwiZXhwIjoyMDkxNDUwMzUwfQ.aSrcu2CyboW-RNHzxsNHdMh1o74hk8qapnF2NyTxx9c',
+    httpsmsApiKey: process.env.HTTPSMS_API_KEY,
+    googleVisionApiKey: process.env.GOOGLE_VISION_API_KEY,
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
     public: {
-      supabaseUrl: 'https://ikeggsjzytrrdgnqebkb.supabase.co',
-      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZWdnc2p6eXRycmRnbnFlYmtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NzQzNTAsImV4cCI6MjA5MTQ1MDM1MH0.H4BPwZ6naBpF9ZHeqhfdLzzcQmA9UOn4nYWmjlGUNHE'
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseKey: process.env.SUPABASE_ANON_KEY
     }
   },
 
